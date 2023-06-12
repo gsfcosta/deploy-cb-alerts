@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cb-alerts
+  namespace: integrations
+spec:
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  schedule: '*/15 * * * *'  # Define a programação da cronjob (aqui, a cada 5 minutos)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+        
+          containers:
+            - env:
+                - name: API_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: API_ID
+                      name: cb.alerts.keys
+                      optional: false
+                - name: API_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: API_SECRET_KEY
+                      name: cb.alerts.keys
+                      optional: false
+              image: private.registry/carbon_black/alerts:IMAGE_TAG
+              imagePullPolicy: IfNotPresent
+              name: cb-alerts
+              
+          restartPolicy: OnFailure  # Define a política de reinício da cronjob
